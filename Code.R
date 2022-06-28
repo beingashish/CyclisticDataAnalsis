@@ -25,6 +25,7 @@ New_Data1 <- New_Data %>% mutate(Total_Ride_Time = as.Date(ended_at) - as.Date(s
   mutate(Weekday = weekdays(as.Date(New_Data$started_at)))
 
 View(New_Data1)
+str(New_Data1)
 
 #Calculating the total ride length and storing it in a separate object called "Total Ride Time"
 
@@ -54,14 +55,50 @@ New_Data1 %>%
   arrange(member_casual, weekday)
 
 #Visualize the data
-#Number of rides by rider types and average duration
+
+#Visualizing the number of rides by rider types against day of the week
 New_Data1%>%
-  mutate(weekday1=wday(started_at))%>%
+  mutate(weekday1=wday(started_at, label = TRUE))%>%
   group_by(member_casual, weekday1)%>%
   summarise(number_of_rides=n(), average_duration=mean(Total_Ride_Time))%>%
   arrange(member_casual, weekday1)%>%
-  ggplot(aes(x=weekday1, y=number_of_rides, fill=member_casual))%>%
-  geom_col()
+  ggplot(aes(x=weekday1, y=number_of_rides, fill=member_casual))+
+  geom_col(position = "Dodge")+
+  labs(title="Number of riders Vs Weekday")+
+  xlab("Days of Week")+
+  ylab("Number of Rides")
+
+#Visualizing average duration by day of the week
+New_Data1%>%
+  mutate(weekday1=wday(started_at, label = TRUE))%>%
+  group_by(member_casual, weekday1)%>%
+  summarise(number_of_rides=n(), average_duration=mean(Total_Ride_Time))%>%
+  arrange(member_casual, weekday1)%>%
+  ggplot(aes(x=weekday1, y=average_duration, fill=member_casual))+
+  geom_col(position = "Dodge")+
+  labs(title="Number of riders Vs Weekday")+
+  xlab("Days of Week")+
+  ylab("Average Ride Length")+
+  theme(panel.background = element_blank())+
+  theme(panel.grid.major = element_line(color = "grey"))
+  
+
+#Visualize rides by month
+New_Data1 %>%  
+  mutate(Month1=format(as.Date(started_at,format = "%Y-%m-%d"), "%m"))%>%
+  group_by(member_casual, Month1 ) %>%  
+  summarise(number_of_rides = n(),average_duration = mean(Total_Ride_Time)) %>% 
+  arrange(member_casual) %>% 
+  ggplot(aes(x=Month1, y=number_of_rides, fill = member_casual)) + geom_col(position = "dodge") + 
+  labs(x= "Month", y= "Total Number of Rides", title = "Rides per Month", fill = "Type of Membership") + 
+  scale_y_continuous(breaks = c(100000, 200000, 300000, 400000), labels = c("100K", "200K", "300K", "400K")) +
+    theme(axis.text.x = element_text(angle = 45))
+
+#Looking at breakdown of bike types rented
+New_Data1 %>%    
+  ggplot(aes(x = rideable_type, fill = member_casual)) + geom_bar(position = "dodge") + 
+  labs(x= 'Bike Type', y='Number of Rentals', title='Membership wise bike usage', fill = 'Type of Membership') +
+  scale_y_continuous(breaks = c(500000, 1000000, 1500000), labels = c("500K", "1Mil", "1.5Mil"))
 
 
            
